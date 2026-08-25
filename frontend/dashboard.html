@@ -114,12 +114,12 @@
 
         <!-- RIGHT COLUMN: ATTACK SPLIT & MALWARE BARS -->
         <div class="right-column">
-            <div class="panel chart-panel">
+            <div class="panel chart-panel" style="min-height: 240px;">
                 <div class="panel-header">
                     <h3>Attack distribution</h3>
                     <span class="drilldown-link">Drill down</span>
                 </div>
-                <div class="donut-container">
+                <div class="donut-container" style="position: relative; height: 200px;">
                     <canvas id="attackDistributionChart"></canvas>
                 </div>
             </div>
@@ -493,62 +493,83 @@
 </script>
 
 <script>
-    // ── Donut Chart — Attack Distribution ─────────────────
-    const ctx1 = document.getElementById('attackDistributionChart').getContext('2d');
-    new Chart(ctx1, {
-        type: 'doughnut',
-        data: {
-            labels: ['Phishing', 'Ransomware', 'DDoS', 'Malware', 'Brute Force', 'SQL Injection'],
-            datasets: [{
-                data: [34, 23, 14, 10, 12, 7],
-                backgroundColor: [
-                    '#EF4444',
-                    '#F59E0B',
-                    '#38BDF8',
-                    '#34D399',
-                    '#A78BFA',
-                    '#FB923C'
-                ],
-                borderWidth: 0,
-                hoverOffset: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        color: '#94A3B8',
-                        font: { size: 10 },
-                        padding: 8,
-                        usePointStyle: true,
-                        boxWidth: 8,
-                        generateLabels: (chart) => {
-                            const data = chart.data;
-                            return data.labels.map((label, i) => ({
-                                text: `${label}  ${data.datasets[0].data[i]}%`,
-                                fillStyle: data.datasets[0].backgroundColor[i],
-                                strokeStyle: 'transparent',
-                                pointStyle: 'rectRounded',
-                                index: i
-                            }));
-                        },
+    // ── Doughnut Chart — Attack Distribution ─────────────────
+        const ctx1 = document.getElementById('attackDistributionChart').getContext('2d');
+        const attackChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['Phishing', 'Ransomware', 'Brute Force', 'DDoS', 'Malware', 'SQL Injection'],
+                datasets: [{
+                    data: [34, 23, 12, 14, 10, 7],
+                    backgroundColor: [
+                        '#EF4444',
+                        '#F59E0B',
+                        '#A78BFA',
+                        '#38BDF8',
+                        '#34D399',
+                        '#FB923C'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { right: 10 }
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        align: 'center',
+                        labels: {
+                            color: '#F1F5F9',
+                            font: { size: 11, family: 'Calibri, sans-serif' },
+                            padding: 12,
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 10,
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+                                // Short labels to prevent truncation
+                                const shortLabels = {
+                                    'Phishing': 'Phishing',
+                                    'Ransomware': 'Ransomware',
+                                    'DDoS': 'DDoS',
+                                    'Malware': 'Malware',
+                                    'Brute Force': 'Brute Force',
+                                    'SQL Injection': 'SQLi'
+                                };
+
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const pct = ((value / total) * 100).toFixed(0);
+                                    return {
+                                        text: `${shortLabels[label]}  ${pct}%`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        strokeStyle: 'transparent',
+                                        pointStyle: 'rectRounded',
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%`
+                        }
                     }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%`
-                    }
-                }
-            },
-            cutout: '65%'
-        }
-    });
-
+                cutout: '68%'
+            }
+        });
 
     // ── Horizontal Bar Chart — Top Malware Families ────────
-    const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
+    /*const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
     new Chart(ctx2, {
         type: 'bar',
         data: {
@@ -583,7 +604,88 @@
                 }
             }
         }
-    });
+    }); */
+    // ── Horizontal Bar Chart — Top Malware Families ────────
+        const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
+        const malwareChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Emotet', 'LockBit 3', 'BlackCat', 'Qakbot', 'Cobalt Strike',
+                    'RedLine', 'AgentTesla', 'AsyncRAT', 'Raccoon', 'Formbook'
+                ],
+                datasets: [{
+                    data: [287, 221, 172, 121, 89, 76, 64, 51, 43, 38],
+                    backgroundColor: [
+                        '#A78BFA', '#EF4444', '#F59E0B', '#38BDF8', '#34D399',
+                        '#C4B5FD', '#FCD34D', '#67E8F9', '#6EE7B7', '#F9A8D4'
+                    ],
+                    borderRadius: 4,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.parsed.x} detections`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#475569' },
+                        grid: { color: '#0F1F35' }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#94A3B8',
+                            font: { size: 10 }
+                        },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // ── Fetch real malware data from backend ──────────────
+        async function loadMalwareChart() {
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/threats');
+                const result = await res.json();
+                const threats = result.data;
+
+                if (threats && threats.length > 0) {
+                    // Count malware families from threat titles
+                    const malwareCounts = {};
+                    threats.forEach(t => {
+                        if (t.attack_type === 'Malware' || t.attack_type === 'Ransomware') {
+                            const name = t.title.split(' ')[0]; // Take first word as family name
+                            malwareCounts[name] = (malwareCounts[name] || 0) + 1;
+                        }
+                    });
+
+                    // Sort and take top 10
+                    const sorted = Object.entries(malwareCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 10);
+
+                    if (sorted.length > 0) {
+                        malwareChart.data.labels = sorted.map(d => d[0]);
+                        malwareChart.data.datasets[0].data = sorted.map(d => d[1]);
+                        malwareChart.update();
+                        console.log('✅ Malware data loaded from backend');
+                    }
+                }
+            } catch (err) {
+                console.log('⚠️ Using static malware data — backend not reachable');
+            }
+        }
+
+        loadMalwareChart();
 
     // ── Horizontal Bar Chart — Top Targeted Countries ────────
     const ctx4 = document.getElementById('topTargetedCountries').getContext('2d');
