@@ -568,6 +568,93 @@
             }
         });
 
+    // ── Click handler for drill-down ──────────────────
+    document.getElementById('attackDistributionChart').addEventListener('click', function (evt) {
+        const points = attackChart.getElementsAtEventForMode(
+            evt, 'nearest', { intersect: true }, true
+        );
+        if (points.length) {
+            const index = points[0].index;
+            const label = attackChart.data.labels[index];
+            const value = attackChart.data.datasets[0].data[index];
+            showDrillDown(label, value);
+        }
+    });
+
+    // ── Drill-down modal function ─────────────────────
+    function showDrillDown(attackType, percentage) {
+        // Remove existing panel if open
+        const existing = document.getElementById('drilldown-panel');
+        if (existing) existing.remove();
+
+        const panel = document.createElement('div');
+        panel.id = 'drilldown-panel';
+        panel.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #080F1E;
+                border: 0.5px solid #7C3AED;
+                border-radius: 12px;
+                padding: 24px;
+                z-index: 9999;
+                min-width: 340px;
+                box-shadow: 0 0 40px rgba(124,58,237,0.3);
+            `;
+
+        const total = 1247;
+        const count = Math.round(total * percentage / 100);
+
+        panel.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <span style="color:#A78BFA; font-size:13px; font-weight:500;">
+                        🔍 Drill Down — ${attackType}
+                    </span>
+                    <span onclick="document.getElementById('drilldown-panel').remove()"
+                          style="color:#475569; cursor:pointer; font-size:18px; line-height:1;">✕</span>
+                </div>
+                <div style="border-top:0.5px solid #1E293B; margin-bottom:14px;"></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:#64748B; font-size:12px;">Share of total threats</span>
+                    <span style="color:#F1F5F9; font-size:12px; font-weight:500;">${percentage}%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:#64748B; font-size:12px;">Estimated incidents</span>
+                    <span style="color:#F1F5F9; font-size:12px; font-weight:500;">${count} incidents</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                    <span style="color:#64748B; font-size:12px;">Trend</span>
+                    <span style="color:#EF4444; font-size:12px; font-weight:500;">↑ High activity</span>
+                </div>
+                <div style="color:#64748B; font-size:11px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
+                    Severity breakdown
+                </div>
+                <div style="display:flex; gap:8px; margin-bottom:16px;">
+                    <div style="flex:1; background:#1B2A4A; border-radius:8px; padding:10px; text-align:center;">
+                        <div style="color:#EF4444; font-size:16px; font-weight:500;">${Math.round(count * 0.5)}</div>
+                        <div style="color:#475569; font-size:10px; margin-top:2px;">High</div>
+                    </div>
+                    <div style="flex:1; background:#1B2A4A; border-radius:8px; padding:10px; text-align:center;">
+                        <div style="color:#F59E0B; font-size:16px; font-weight:500;">${Math.round(count * 0.35)}</div>
+                        <div style="color:#475569; font-size:10px; margin-top:2px;">Medium</div>
+                    </div>
+                    <div style="flex:1; background:#1B2A4A; border-radius:8px; padding:10px; text-align:center;">
+                        <div style="color:#A78BFA; font-size:16px; font-weight:500;">${Math.round(count * 0.15)}</div>
+                        <div style="color:#475569; font-size:10px; margin-top:2px;">Low</div>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('drilldown-panel').remove()"
+                        style="width:100%; background:#2D1F63; border:0.5px solid #7C3AED;
+                               color:#A78BFA; border-radius:6px; padding:8px;
+                               cursor:pointer; font-size:12px;">
+                    Close
+                </button>
+            `;
+
+        document.body.appendChild(panel);
+    }
+
     // ── Horizontal Bar Chart — Top Malware Families ────────
     /*const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
     new Chart(ctx2, {
