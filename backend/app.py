@@ -194,6 +194,6 @@ def get_timeline():
 
     return jsonify({"status": "ok", "data": sorted_timeline})
 
-# ── Run server ────────────────────────────────────────
+# ── Run server ───────────────────────────────────────
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
