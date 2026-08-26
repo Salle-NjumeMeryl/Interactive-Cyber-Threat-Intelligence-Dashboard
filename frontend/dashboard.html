@@ -401,6 +401,7 @@
             const mapDiv = document.getElementById('map');
             const globeDiv = document.getElementById('globe');
 
+<<<<<<< HEAD
             if (!isGlobeView) {
                 isGlobeView = true;
                 btn.textContent = '🗺️ Flat map';
@@ -488,12 +489,170 @@
                     tooltip: {
                         callbacks: {
                             label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%`
+=======
+<script>
+    // ── Doughnut Chart — Attack Distribution ─────────────────
+    const ctx1 = document.getElementById('attackDistributionChart').getContext('2d');
+    const attackChart = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Phishing', 'Ransomware', 'Brute Force', 'DDoS', 'Malware', 'SQL Injection'],
+            datasets: [{
+                data: [34, 23, 12, 14, 10, 7],
+                backgroundColor: [
+                    '#EF4444',
+                    '#F59E0B',
+                    '#A78BFA',
+                    '#38BDF8',
+                    '#34D399',
+                    '#FB923C'
+                ],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: { right: 10 }
+            },
+            plugins: {
+                legend: {
+                    position: 'right',
+                    align: 'center',
+                    labels: {
+                        color: '#F1F5F9',
+                        font: { size: 11, family: 'Calibri, sans-serif' },
+                        padding: 12,
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded',
+                        boxWidth: 10,
+                        generateLabels: (chart) => {
+                            const data = chart.data;
+                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+                            // Short labels to prevent truncation
+                            const shortLabels = {
+                                'Phishing': 'Phishing',
+                                'Ransomware': 'Ransomware',
+                                'DDoS': 'DDoS',
+                                'Malware': 'Malware',
+                                'Brute Force': 'Brute Force',
+                                'SQL Injection': 'SQLi'
+                            };
+
+                            return data.labels.map((label, i) => {
+                                const value = data.datasets[0].data[i];
+                                const pct = ((value / total) * 100).toFixed(0);
+                                return {
+                                    text: `${shortLabels[label]}  ${pct}%`,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    strokeStyle: 'transparent',
+                                    pointStyle: 'rectRounded',
+                                    index: i
+                                };
+                            });
+>>>>>>> 4b364b2babaf18e3bd69f97d8092fa092ecd5ac9
                         }
                     }
                 },
-                cutout: '68%'
-            }
-        });
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%`
+                    }
+                }
+            },
+            cutout: '68%'
+        }
+    });
+
+    // ── Click handler for drill-down ──────────────────
+    document.getElementById('attackDistributionChart').addEventListener('click', function (evt) {
+        const points = attackChart.getElementsAtEventForMode(
+            evt, 'nearest', { intersect: true }, true
+        );
+        if (points.length) {
+            const index = points[0].index;
+            const label = attackChart.data.labels[index];
+            const value = attackChart.data.datasets[0].data[index];
+            showDrillDown(label, value);
+        }
+    });
+
+    // ── Drill-down modal function ─────────────────────
+    function showDrillDown(attackType, percentage) {
+        // Remove existing panel if open
+        const existing = document.getElementById('drilldown-panel');
+        if (existing) existing.remove();
+
+        const panel = document.createElement('div');
+        panel.id = 'drilldown-panel';
+        panel.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #080F1E;
+                border: 0.5px solid #7C3AED;
+                border-radius: 12px;
+                padding: 24px;
+                z-index: 9999;
+                min-width: 340px;
+                box-shadow: 0 0 40px rgba(124,58,237,0.3);
+            `;
+
+        const total = 1247;
+        const count = Math.round(total * percentage / 100);
+
+        panel.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <span style="color:#A78BFA; font-size:13px; font-weight:500;">
+                        🔍 Drill Down — ${attackType}
+                    </span>
+                    <span onclick="document.getElementById('drilldown-panel').remove()"
+                        style="color:#475569; cursor:pointer; font-size:18px; line-height:1;">✕</span>
+                </div>
+                <div style="border-top:0.5px solid #1E293B; margin-bottom:14px;"></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:#64748B; font-size:12px;">Share of total threats</span>
+                    <span style="color:#F1F5F9; font-size:12px; font-weight:500;">${percentage}%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:#64748B; font-size:12px;">Estimated incidents</span>
+                    <span style="color:#F1F5F9; font-size:12px; font-weight:500;">${count} incidents</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                    <span style="color:#64748B; font-size:12px;">Trend</span>
+                    <span style="color:#EF4444; font-size:12px; font-weight:500;">↑ High activity</span>
+                </div>
+                <div style="color:#64748B; font-size:11px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
+                    Severity breakdown
+                </div>
+                <div style="display:flex; gap:8px; margin-bottom:16px;">
+                    <div style="flex:1; background:#1B2A4A; border-radius:8px; padding:10px; text-align:center;">
+                        <div style="color:#EF4444; font-size:16px; font-weight:500;">${Math.round(count * 0.5)}</div>
+                        <div style="color:#475569; font-size:10px; margin-top:2px;">High</div>
+                    </div>
+                    <div style="flex:1; background:#1B2A4A; border-radius:8px; padding:10px; text-align:center;">
+                        <div style="color:#F59E0B; font-size:16px; font-weight:500;">${Math.round(count * 0.35)}</div>
+                        <div style="color:#475569; font-size:10px; margin-top:2px;">Medium</div>
+                    </div>
+                    <div style="flex:1; background:#1B2A4A; border-radius:8px; padding:10px; text-align:center;">
+                        <div style="color:#A78BFA; font-size:16px; font-weight:500;">${Math.round(count * 0.15)}</div>
+                        <div style="color:#475569; font-size:10px; margin-top:2px;">Low</div>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('drilldown-panel').remove()"
+                        style="width:100%; background:#2D1F63; border:0.5px solid #7C3AED;
+                            color:#A78BFA; border-radius:6px; padding:8px;
+                            cursor:pointer; font-size:12px;">
+                    Close
+                </button>
+            `;
+
+        document.body.appendChild(panel);
+    }
 
         document.getElementById('attackDistributionChart').addEventListener('click', function (evt) {
             const points = attackChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
@@ -539,6 +698,7 @@
 
             document.body.appendChild(panel);
         }
+<<<<<<< HEAD
 
         // Horizontal Bar Chart — Top Malware Families
         const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
@@ -593,10 +753,92 @@
             } catch (err) {
                 console.log('⚠️ Using static malware data — backend not reachable');
             }
+=======
+    }); */
+    // ── Horizontal Bar Chart — Top Malware Families ────────
+    const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
+    const malwareChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: [
+                'Emotet', 'LockBit 3', 'BlackCat', 'Qakbot', 'Cobalt Strike',
+                'RedLine', 'AgentTesla', 'AsyncRAT', 'Raccoon', 'Formbook'
+            ],
+            datasets: [{
+                data: [287, 221, 172, 121, 89, 76, 64, 51, 43, 38],
+                backgroundColor: [
+                    '#A78BFA', '#EF4444', '#F59E0B', '#38BDF8', '#34D399',
+                    '#C4B5FD', '#FCD34D', '#67E8F9', '#6EE7B7', '#F9A8D4'
+                ],
+                borderRadius: 4,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ` ${ctx.parsed.x} detections`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#475569' },
+                    grid: { color: '#0F1F35' }
+                },
+                y: {
+                    ticks: {
+                        color: '#94A3B8',
+                        font: { size: 10 }
+                    },
+                    grid: { display: false }
+                }
+            }
+>>>>>>> 4b364b2babaf18e3bd69f97d8092fa092ecd5ac9
         }
+    });
 
-        loadMalwareChart();
+    // ── Fetch real malware data from backend ──────────────
+    async function loadMalwareChart() {
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/threats');
+            const result = await res.json();
+            const threats = result.data;
 
+            if (threats && threats.length > 0) {
+                // Count malware families from threat titles
+                const malwareCounts = {};
+                threats.forEach(t => {
+                    if (t.attack_type === 'Malware' || t.attack_type === 'Ransomware') {
+                        const name = t.title.split(' ')[0]; // Take first word as family name
+                        malwareCounts[name] = (malwareCounts[name] || 0) + 1;
+                    }
+                });
+
+                // Sort and take top 10
+                const sorted = Object.entries(malwareCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+
+                if (sorted.length > 0) {
+                    malwareChart.data.labels = sorted.map(d => d[0]);
+                    malwareChart.data.datasets[0].data = sorted.map(d => d[1]);
+                    malwareChart.update();
+                    console.log('✅ Malware data loaded from backend');
+                }
+            }
+        } catch (err) {
+            console.log('⚠️ Using static malware data — backend not reachable');
+        }
+    }
+
+    loadMalwareChart();
+
+<<<<<<< HEAD
         // Horizontal Bar Chart — Top Targeted Countries
         const ctx4 = document.getElementById('topTargetedCountries').getContext('2d');
         new Chart(ctx4, {
@@ -609,6 +851,37 @@
                     borderRadius: 4,
                     borderWidth: 0
                 }]
+=======
+    // ── Horizontal Bar Chart — Top Targeted Countries ────────
+    const ctx4 = document.getElementById('topTargetedCountries').getContext('2d');
+    new Chart(ctx4, {
+        type: 'bar',
+        data: {
+            labels: ['United States', 'India', 'Germany', 'Cameroon', 'Nigeria', 'United Kingdom', 'Russia', 'China', 'France', 'Brazil'],
+            datasets: [{
+                data: [312, 228, 176, 140, 121, 98, 87, 74, 63, 51],
+                backgroundColor: [
+                    '#A78BFA',
+                    '#EF4444',
+                    '#F59E0B',
+                    '#38BDF8',
+                    '#34D399',
+                    '#FB923C',
+                    '#60A5FA',
+                    '#F472B6',
+                    '#4ADE80',
+                    '#FBBF24'
+                ],
+                borderRadius: 4,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+>>>>>>> 4b364b2babaf18e3bd69f97d8092fa092ecd5ac9
             },
             options: {
                 indexAxis: 'y',

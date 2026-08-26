@@ -9,6 +9,41 @@
 
 <body>
 
+    <div class="filter-bar panel">
+        <div class="filter-group">
+            <label class="filter-lable">Date range:</label>
+            <input type="date" id="startDate" class="filter-input">
+            <span class="date-sep">&rarr;</span>
+            <input type="date" id="endDate" class="filter-input">
+        </div>
+
+        <div class="filter-group">
+            <lable class="filter-lable">Attack Type:</lable>
+            <select id="attackTypeSelect" class="dropdown">
+                <option value="all">All Types</option>
+                <option value="ddos">DDoS</option>
+                <option value="phishing">Phishing</option>
+                <option value="ransomware">Ransomware</option>
+                <option value="malware">Malware</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label class="filter-lable">Severity:</label>
+            <select id="severitySelect" class="dropdown">
+                <option value="all">All Severities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button id="applyFiltersBtn" class="filter-btn active">Apply Filters</button>"
+            <button id="resetFiltersBtn" class="filter-btn">Reset</button>
+        </div>
+    </div>
+    <script src="backend/js/main.js"></script>
 </body>
 
 </html>
