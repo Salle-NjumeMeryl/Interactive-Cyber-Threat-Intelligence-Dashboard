@@ -1,6 +1,5 @@
 from OTXv2 import OTXv2
 
-# Replace with your actual API key
 API_KEY = "24950467d6064440832ba21636eed55fd2627fd8f0fb73667c40b64f0c9e0ee0"
 
 otx = OTXv2(API_KEY)
