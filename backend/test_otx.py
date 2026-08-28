@@ -1,6 +1,9 @@
 from OTXv2 import OTXv2
+import os
 
-API_KEY = "24950467d6064440832ba21636eed55fd2627fd8f0fb73667c40b64f0c9e0ee0"
+API_KEY = os.getenv("OTX_API_KEY")
+if not API_KEY:
+    raise RuntimeError("Set OTX_API_KEY before running this test.")
 
 otx = OTXv2(API_KEY)
 

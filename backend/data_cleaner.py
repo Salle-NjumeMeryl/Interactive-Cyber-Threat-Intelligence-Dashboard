@@ -1,6 +1,6 @@
 import csv
-import json
 from datetime import datetime
+from pathlib import Path
 
 # ── Country name normalization map ────────────────────
 COUNTRY_NAMES = {
@@ -97,8 +97,10 @@ def clean_threats(threats):
     return cleaned
 
 # ── Load CSV fallback data ────────────────────────────
-def load_csv_fallback(filepath='../data/mitre_techniques.csv'):
+def load_csv_fallback(filepath=None):
     threats = []
+    if filepath is None:
+        filepath = Path(__file__).resolve().parent.parent / 'data' / 'mitre_techniques.csv'
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
