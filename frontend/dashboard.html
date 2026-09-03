@@ -26,10 +26,10 @@
         <div class="nav-left">
             <h1 class="brand-title">CTI DASHBOARD</h1>
             <nav class="nav-links">
-                <a href="#" class="active">Overview</a>
-                <a href="#">Threats</a>
-                <a href="#">Malware</a>
-                <a href="#">Reports</a>
+                <a href="dashboard.html" class="active">Overview</a>
+                <a href="threats.html">Threats</a>
+                <a href="malware.html">Malware</a>
+                <a href="reports.html">Reports</a>
             </nav>
         </div>
         <div class="nav-right">
@@ -63,26 +63,63 @@
     </section>
 
     <!-- FILTER BAR ROW -->
-    <section class="filter-bar">
+    <!--<section class="filter-bar">
         <div class="filter-group">
             <span class="filter-label">Filter:</span>
             <button class="filter-btn active">All types</button>
-            <button class="filter-btn">Phishing</button>
-            <button class="filter-btn">Ransomware</button>
-            <button class="filter-btn">DDoS</button>
-            <button class="filter-btn">Malware</button>
-            <button class="filter-btn">SQL Injection</button>
-            <button class="filter-btn">Brute Force</button>
+            <button class="filter-btn" id="chip-phishing" onclick="setFilter('type','Phishing')">Phishing</button>
+            <button class="filter-btn" id="chip-ransomware" onclick="setFilter('type','Ransomware')">Ransomware</button>
+            <button class="filter-btn" id="chip-ddos" onclick="setFilter('type','DDoS')">DDoS</button>
+            <button class="filter-btn" id="chip-malware" onclick="setFilter('type','Malware')">Malware</button>
+            <button class="filter-btn" id="chip-sql-injection" onclick="setFilter('type','SQL Injection')">SQL Injection</button>
+            <button class="filter-btn" id="chip-brute-force" onclick="setFilter('type','Brute Force')">Brute Force</button>
         </div>
         <div class="filter-dropdowns">
             <select class="dropdown">
                 <option>Last 7 days</option>
+                <option>Last 14 days</option>
+                <option>Last 30 days</option>
             </select>
-            <select class="dropdown">
+            <select class="dropdown" id="filter-country" oninput="applyFilters()" class="chip"
+            placeholder="Search country..." 
+            style="background:#080F1E; border:0.5px solid #1E293B; color:#F1F5F9; 
+                border-radius:5px; padding:3px 9px; font-size:10px; width:130px;">
                 <option>Country</option>
             </select>
             <select class="dropdown">
                 <option>Severity</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+    </section>-->
+
+    <section class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-btn active" id="chip-all" onclick="setFilter('type','All')">All types</button>
+            <button class="filter-btn" id="chip-phishing" onclick="setFilter('type','Phishing')">Phishing</button>
+            <button class="filter-btn" id="chip-ransomware" onclick="setFilter('type','Ransomware')">Ransomware</button>
+            <button class="filter-btn" id="chip-ddos" onclick="setFilter('type','DDoS')">DDoS</button>
+            <button class="filter-btn" id="chip-malware" onclick="setFilter('type','Malware')">Malware</button>
+            <button class="filter-btn" id="chip-sql-injection" onclick="setFilter('type','SQL Injection')">SQL
+                Injection</button>
+            <button class="filter-btn" id="chip-brute-force" onclick="setFilter('type','Brute Force')">Brute Force</button>
+        </div>
+        <div class="filter-dropdowns">
+            <select class="dropdown" id="filter-date" onchange="applyFilters()">
+                <option value="7">Last 7 days</option>
+                <option value="14">Last 14 days</option>
+                <option value="30">Last 30 days</option>
+            </select>
+            <input id="filter-country" class="dropdown" oninput="applyFilters()" placeholder="Search country..." style="background:#080F1E; border:0.5px solid #1E293B; color:#F1F5F9;
+                    border-radius:5px; padding:3px 9px; font-size:10px; width:130px;" />
+            <select class="dropdown" id="filter-severity" onchange="applyFilters()">
+                <option value="All">Severity</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
             </select>
         </div>
     </section>
@@ -655,43 +692,7 @@
         document.body.appendChild(panel);
     }
 
-    // ── Horizontal Bar Chart — Top Malware Families ────────
-    /*const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
-    new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: ['Emotet', 'LockBit 3', 'BlackCat', 'Qakbot', 'Cobalt Strike'],
-            datasets: [{
-                data: [287, 221, 172, 121, 89],
-                backgroundColor: [
-                    '#A78BFA',
-                    '#EF4444',
-                    '#F59E0B',
-                    '#38BDF8',
-                    '#34D399'
-                ],
-                borderRadius: 4,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#475569' },
-                    grid: { color: '#0F1F35' }
-                },
-                y: {
-                    ticks: { color: '#94A3B8' },
-                    grid: { display: false }
-                }
-            }
-        }
-    }); */
+
     // ── Horizontal Bar Chart — Top Malware Families ────────
     const ctx2 = document.getElementById('topMalwareChart').getContext('2d');
     const malwareChart = new Chart(ctx2, {
@@ -884,6 +885,288 @@
             }
         }
     });
+
+    // ── Filter State ──────────────────────────────────────
+    const activeFilters = {
+        type: 'All',
+        severity: 'All',
+        country: '',
+        days: 7
+    };
+
+    // ── Chip ID map matching your exact HTML IDs ──────────
+    const chipMap = {
+        'All': 'chip-all',
+        'Phishing': 'chip-phishing',
+        'Ransomware': 'chip-ransomware',
+        'DDoS': 'chip-ddos',
+        'Malware': 'chip-malware',
+        'SQL Injection': 'chip-sql-injection',
+        'Brute Force': 'chip-brute-force'
+    };
+
+    // ── Set attack type from chip click ──────────────────
+    function setFilter(key, value) {
+        activeFilters[key] = value;
+
+        // Remove active class from all filter-btn elements
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Add active to clicked chip
+        const activeChip = document.getElementById(chipMap[value]);
+        if (activeChip) activeChip.classList.add('active');
+
+        applyFilters();
+    }
+
+    // ── Read dropdowns and apply all filters ──────────────
+    function applyFilters() {
+        activeFilters.severity = document.getElementById('filter-severity')?.value || 'All';
+        activeFilters.country = document.getElementById('filter-country')?.value.toLowerCase().trim() || '';
+        activeFilters.days = parseInt(document.getElementById('filter-date')?.value || 7);
+
+        fetchAndFilter();
+    }
+
+    // ── Fetch + filter + update all panels ────────────────
+    async function fetchAndFilter() {
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/threats');
+            const result = await res.json();
+            let threats = result.data || [];
+
+            // Filter by attack type
+            if (activeFilters.type !== 'All') {
+                threats = threats.filter(t => t.attack_type === activeFilters.type);
+            }
+
+            // Filter by severity
+            if (activeFilters.severity !== 'All') {
+                threats = threats.filter(t => t.severity === activeFilters.severity);
+            }
+
+            // Filter by country search
+            if (activeFilters.country) {
+                threats = threats.filter(t =>
+                    t.country.toLowerCase().includes(activeFilters.country)
+                );
+            }
+
+            // Filter by date range
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - activeFilters.days);
+            threats = threats.filter(t => new Date(t.timestamp) >= cutoff);
+
+            console.log(`✅ Filters applied — ${threats.length} threats visible`);
+
+            // Update all 5 panels simultaneously
+            updateKPICards(threats);
+            updateAttackChart(threats);
+            updateMalwareChart(threats);
+            updateCountriesChart(threats);
+            updateTrendChart(threats);
+            updateThreatTable(threats);
+
+        } catch (err) {
+            console.log('⚠️ Backend not reachable — filters applied to static data only');
+        }
+    }
+
+    // ── KPI Cards — using your exact IDs ─────────────────
+    function updateKPICards(threats) {
+        // Total threats today
+        const todayEl = document.getElementById('kpi-threats-today');
+        if (todayEl) todayEl.textContent = threats.length.toLocaleString();
+
+        // Top attack type
+        const typeCounts = {};
+        threats.forEach(t => {
+            typeCounts[t.attack_type] = (typeCounts[t.attack_type] || 0) + 1;
+        });
+        const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0];
+        const topTypeEl = document.getElementById('kpi-top-attack');
+        if (topTypeEl && topType) topTypeEl.textContent = topType[0];
+
+        // Top origin country
+        const countryCounts = {};
+        threats.forEach(t => {
+            if (t.country && t.country !== 'Unknown')
+                countryCounts[t.country] = (countryCounts[t.country] || 0) + 1;
+        });
+        const topCountry = Object.entries(countryCounts).sort((a, b) => b[1] - a[1])[0];
+        const topOriginEl = document.getElementById('kpi-top-origin');
+        if (topOriginEl && topCountry) topOriginEl.textContent = topCountry[0];
+
+        // Top malware — using kpi-active-malware id
+        const malwareCounts = {};
+        threats.filter(t => t.attack_type === 'Malware' || t.attack_type === 'Ransomware')
+            .forEach(t => {
+                const name = t.title.split(' ')[0];
+                malwareCounts[name] = (malwareCounts[name] || 0) + 1;
+            });
+        const topMalware = Object.entries(malwareCounts).sort((a, b) => b[1] - a[1])[0];
+        const malwareEl = document.getElementById('kpi-active-malware');
+        if (malwareEl && topMalware) malwareEl.textContent = topMalware[0];
+    }
+
+    // ── Attack Distribution — using attackDistributionChart ──
+    function updateAttackChart(threats) {
+        const TYPES = ['Phishing', 'Ransomware', 'Brute Force', 'DDoS', 'Malware', 'SQL Injection'];
+        const counts = {};
+        TYPES.forEach(t => counts[t] = 0);
+        threats.forEach(t => {
+            if (counts[t.attack_type] !== undefined) counts[t.attack_type]++;
+        });
+        attackChart.data.datasets[0].data = TYPES.map(t => counts[t]);
+        attackChart.update();
+    }
+
+    // ── Top Malware — using topMalwareChart ──────────────
+    function updateMalwareChart(threats) {
+        const counts = {};
+        threats.filter(t => t.attack_type === 'Malware' || t.attack_type === 'Ransomware')
+            .forEach(t => {
+                const name = t.title.split(' ')[0];
+                counts[name] = (counts[name] || 0) + 1;
+            });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        if (sorted.length > 0) {
+            malwareChart.data.labels = sorted.map(d => d[0]);
+            malwareChart.data.datasets[0].data = sorted.map(d => d[1]);
+            malwareChart.update();
+        }
+    }
+
+    // ── Top Targeted Countries — using topTargetedCountries ──
+    function updateCountriesChart(threats) {
+        const counts = {};
+        threats.forEach(t => {
+            if (t.country && t.country !== 'Unknown')
+                counts[t.country] = (counts[t.country] || 0) + 1;
+        });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        if (sorted.length > 0) {
+            countriesChart.data.labels = sorted.map(d => d[0]);
+            countriesChart.data.datasets[0].data = sorted.map(d => d[1]);
+            countriesChart.update();
+        }
+    }
+
+    // ── Trend Chart — using trendChart ───────────────────
+    function updateTrendChart(threats) {
+        const timeline = {};
+        threats.forEach(t => {
+            if (t.timestamp) {
+                const date = t.timestamp.substring(0, 10);
+                timeline[date] = (timeline[date] || 0) + 1;
+            }
+        });
+        const sorted = Object.entries(timeline).sort((a, b) => a[0].localeCompare(b[0]));
+        if (sorted.length > 0) {
+            trendChart.data.labels = sorted.map(d => d[0]);
+            trendChart.data.datasets[0].data = sorted.map(d => d[1]);
+            trendChart.data.datasets[1].data = sorted.map(d => Math.floor(d[1] * 0.73));
+            trendChart.update();
+        }
+    }
+
+    // ── Threat Table — using pulse-table-body ─────────────
+    function updateThreatTable(threats) {
+        const tbody = document.getElementById('pulse-table-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (threats.length === 0) {
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align:center; color:#475569; padding:16px;">
+                    No threats match the current filters
+                </td>
+            </tr>`;
+            return;
+        }
+
+        threats.slice(0, 8).forEach(t => {
+            const sevClass = t.severity === 'High' ? 'high' :
+                t.severity === 'Medium' ? 'med' : 'low';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${t.title.substring(0, 35)}</td>
+            <td>${t.attack_type}</td>
+            <td>${t.country.substring(0, 15)}</td>
+            <td><span class="sev-badge ${sevClass}">${t.severity}</span></td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // ── Polling Mechanism — Simulated Real-Time ───────────
+
+        // Update the live timestamp in your navbar
+        // Uses your exact id: "live-timestamp"
+        function updateTimestamp() {
+            const el = document.getElementById('live-timestamp');
+            if (!el) return;
+            const now = new Date();
+            const date = now.toLocaleDateString('en-GB', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+            const time = now.toLocaleTimeString('en-GB', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            el.textContent = `${date} ${time}`;
+        }
+
+        // Silent background refresh — calls backend and updates
+        // all panels without reloading the page
+        async function silentRefresh() {
+            console.log('🔄 Auto-refreshing dashboard...');
+            updateTimestamp();
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/threats');
+                const result = await res.json();
+                let threats = result.data || [];
+
+                // Apply current active filters to fresh data
+                if (activeFilters.type !== 'All') {
+                    threats = threats.filter(t => t.attack_type === activeFilters.type);
+                }
+                if (activeFilters.severity !== 'All') {
+                    threats = threats.filter(t => t.severity === activeFilters.severity);
+                }
+                if (activeFilters.country) {
+                    threats = threats.filter(t =>
+                        t.country.toLowerCase().includes(activeFilters.country)
+                    );
+                }
+
+                // Update all panels silently
+                updateKPICards(threats);
+                updateAttackChart(threats);
+                updateMalwareChart(threats);
+                updateCountriesChart(threats);
+                updateTrendChart(threats);
+                updateThreatTable(threats);
+
+                console.log(`✅ Silent refresh complete — ${threats.length} threats loaded`);
+
+            } catch (err) {
+                console.log('⚠️ Auto-refresh skipped — backend not reachable');
+            }
+        }
+
+        // Update timestamp every second so clock ticks live
+        setInterval(updateTimestamp, 1000);
+
+        // Refresh all dashboard data every 60 seconds
+        setInterval(silentRefresh, 60000);
+
+        // Run once immediately on page load
+        updateTimestamp();
+        silentRefresh();
 </script>
 
 </html>
